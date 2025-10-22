@@ -1,5 +1,19 @@
 ## Modulação de tablatura
 
+### Desenvolvimento
+
+Para executar o projeto localmente:
+
+```bash
+# Instalar dependências
+pnpm install
+
+# Executar servidor de desenvolvimento
+pnpm run dev
+```
+
+O servidor será iniciado na porta 3000 e abrirá automaticamente no navegador.
+
 ### Conceito
 
 Uma viola é um instrumento musical composto por 5 pares de cordas ou um pouco mais. As afinações mais utilizadas são as cebolão em Mi e Ré.  
