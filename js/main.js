@@ -25,10 +25,6 @@ $(document).ready(function () {
         appState.linhas = checkCifraLines(data);
         $("#cifra_original").text(appState.cifraOriginal);
         $("#cifra").text(appState.cifraOriginal);
-        appState.tablaturas = Tablatura.extrairDaCifra(
-          afinacoesPorApelido[appState.afinacaoOriginal],
-          data
-        );
         appState.cifras = Cifra.extrairDaCifra(
           afinacoesPorApelido[appState.afinacaoOriginal],
           data
@@ -40,21 +36,9 @@ $(document).ready(function () {
 
   window.addEventListener("resize", renderDependingOnWindowSize);
 
-  // Populando select de afinações
-  afinacoes.forEach((afinacao) => {
-    $("select#afinacao").append(
-      `<option value="${afinacao.apelido}" ${
-        appState.afinacao === afinacao.apelido ? "selected" : ""
-      }>${afinacao.nome}</option>`
-    );
-  });
-
   // Ao trocar campo select de cifras, popula os dados de cifras
   $("#cifras").change((e) => trocarCifra(e.target.value));
   $("#cifras").change();
-
-  // Setando afinação inicial
-  $("select#afinacao").val(appState.afinacao);
 
   // Regulagem de tons, preenchendo tom principal
   $("input#tom").val(appState.tom);
@@ -71,7 +55,6 @@ $(document).ready(function () {
     appState.tom = novoTom;
     $("input#tom").val(diegoHackChangeBemois(appState.tom));
     // Alterando tom e renderizando no corpo do elemento #cifra
-    appState.tablaturas.forEach((tablatura) => tablatura.alterarTom());
     appState.cifras.forEach((cifra) => cifra.alterarTom());
     renderDependingOnWindowSize();
   });
@@ -88,7 +71,6 @@ $(document).ready(function () {
     appState.tom = novoTom;
     $("input#tom").val(diegoHackChangeBemois(appState.tom));
     // Alterando tom e renderizando no corpo do elemento #cifra
-    appState.tablaturas.forEach((tablatura) => tablatura.alterarTom());
     appState.cifras.forEach((cifra) => cifra.alterarTom());
     renderDependingOnWindowSize();
   });
@@ -105,17 +87,7 @@ $(document).ready(function () {
     appState.tom = novoTom;
     $("input#tom").val(diegoHackChangeBemois(appState.tom));
     // Alterando tom e renderizando no corpo do elemento #cifra
-    appState.tablaturas.forEach((tablatura) => tablatura.alterarTom());
     appState.cifras.forEach((cifra) => cifra.alterarTom());
-    renderDependingOnWindowSize();
-  });
-
-  // Alterando afinação pelo select
-  $("#afinacao").change((e) => {
-    appState.afinacao = e.target.value;
-    appState.tablaturas.forEach((tablatura) =>
-      tablatura.alterarAfinacao(e.target.value)
-    );
     renderDependingOnWindowSize();
   });
 

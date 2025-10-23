@@ -1,4 +1,4 @@
-## Modulação de tablatura
+## Modulação de cifras
 
 ### Desenvolvimento
 
@@ -16,40 +16,22 @@ O servidor será iniciado na porta 3000 e abrirá automaticamente no navegador.
 
 ### Conceito
 
-Uma viola é um instrumento musical composto por 5 pares de cordas ou um pouco mais. As afinações mais utilizadas são as cebolão em Mi e Ré.  
+A viola caipira é composta por cinco pares de cordas. Mesmo sem trabalhar com tablaturas, é comum precisar transpor cifras para
+adequar uma música ao alcance vocal ou ao repertório. Este projeto permite manipular cifras de forma simples no navegador,
+realizando a leitura de arquivos texto, exibindo a cifra original e oferecendo ferramentas para modulação do tom.
 
-Tablatura é uma forma gráfica de escrever as notas a serem tocas em ordem sem a variável ritmo. 
+As cifras de exemplo distribuídas com o projeto foram atualizadas para contemplar apenas canções cifradas, sem qualquer trecho de
+tablatura.
 
-Esse script tem por finalidade receber uma tablatura como entrada e:
+### Funcionalidades
 
-- [ ] Permitir que, ao trocar a afinação entre Cebolão Mi e Cebolão Ré, a tablatura se ajuste
-- [ ] Permitir que, ao trocar o tom da música, a tablatura se ajuste
-- [ ] Permitir a quebra de linhas para tablaturas longas serem responsivas em dispositivos móveis
+- [x] Carregar cifras a partir de arquivos `.txt`
+- [x] Ajustar o tom da cifra em semitons para cima ou para baixo
+- [x] Adaptar a exibição para diferentes larguras de tela
 
-### Notações de tablatura
+### Instruções de uso
 
-h - hammer-on
-p - pull-off
-b - bend
-r - soltar o bend
-~ ou v - vibrato
-t - tap
-ou / ou s - slide
-x - tocar a nota abafada
-
-Notação | Tradução | Explicação
---- | --- | ---
-`h` | hammer-on | Tocar a nota sem auxílio da mão direita, como um martelo na nota
-`p` | pull-off |
-`b` | bend | modular uma nota arrastando ela pressionada para cima
-`r` | release | soltar o bend
-`~ ou v` | vibrato | fazer um vibrato com a corda com movimentos longitudinais rapidos com a nota pressionada
-`/ ou s` | slide | arrastar o dedo de uma casa para outra
-`x` | | tocar a nota abafada
-
-# Instruções de uso
-
-Primeiramente é necessário importar todos os arquivos de script em sua página: 
+Primeiramente é necessário importar todos os arquivos de script em sua página:
 
 ```html
 <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
@@ -58,41 +40,36 @@ Primeiramente é necessário importar todos os arquivos de script em sua página
 <script src="js/classes/Corda.js"></script>
 <script src="js/classes/Afinacao.js"></script>
 <script src="js/config.js"></script>
-<script src="js/classes/Notacao.js"></script>
-<script src="js/classes/Tablatura.js"></script>
 <script src="js/classes/Cifra.js"></script>
 <script src="js/main.js"></script>
 ```
 
-Pode se considerar interessante importar apenas um arquivo, nesse caso considere copiar todos os arquivos importados na ordem em um só arquivo `script.js` e utilize uma ferramenta como https://javascript-minifier.com para minificar o arquivo deixando mais leve de carregar e diminuindo o número de requisições
+Pode se considerar interessante importar apenas um arquivo. Nesse caso, copie todo o conteúdo dos scripts na ordem acima para um
+único arquivo `script.js` e utilize uma ferramenta como https://javascript-minifier.com para minificá-lo, reduzindo o número de
+requisições.
 
-```html
-<script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
-<script src="js/script.min.js"></script>
-```
+### Configurações
 
-## Configurações
-Para configurações existe um arquivo chamado `config.js`. O estado do app (no caso o estado da cifra/tablaturas e as suas configurações iniciais podem ser feitas por esse arquivo).  
+As configurações são centralizadas no arquivo `config.js`. Nele é possível definir a lista de cifras (`bancoDeCifras`) e o estado
+inicial da aplicação (`appState`).
 
 | Variável | Descrição |
-|---|---|
-| `appState` | guarda informações de estado da cifra e armazena as tablaturas |
-| `afinacoes` | Guarda as afinações possíveis, que alimenta o campo select e calcula as tonalidades com base nas cordas de cada afinação |
+| --- | --- |
+| `appState` | guarda informações de estado da cifra, como tom atual, afinacão selecionada, linhas renderizadas e se o modo premium está ativo |
+| `afinacoes` | guarda as afinações possíveis e alimenta utilidades que dependem da afinação original das cifras |
 
-## Funções importantes
+### Funções importantes
 
-### `renderDependingOnWindowSize`
+#### `renderDependingOnWindowSize`
 
-Função utilizada em `config.js` para estabelecer os *breakpoints* utilizados na quebra de tablaturas (o número indicado significa o número de notações por lina) e letra (número de caracteres com correção de palavras, ou seja, se uma palavra encerra no meio da quebra, ela é escrita até o final)
+Função utilizada em `config.js` para estabelecer os *breakpoints* utilizados na quebra das cifras (o número indicado representa a
+quantidade de caracteres por linha). A exibição mobile respeita as palavras completas, evitando quebras abruptas.
 
-### `Tablatura.extrairDaCifra(Afinacao, string): [Tablatura]`
+#### `Cifra.extrairDaCifra(Afinacao, string): [Cifra]`
 
-Utilizado para extrair de uma cifra em string as tablaturas e salvála no `appState.tablaturas` como uma lista de objetos Tablatura
+Utilizado para extrair de uma cifra em string as linhas cifradas e salvá-las no `appState.cifras` como uma lista de objetos `Cifra`.
 
-### `tablatura.alterarTom(notacaoTom)`
+#### `cifra.alterarTom(notacaoTom)`
 
-Método da instância de `Tablatura`. Altera o da tablatura instanciada de `appState.tomOriginal` para o tom em `notacaoTom`
-
-### `cifra.alterarTom(notacaoTom)`
-
-Método da instância de `Cifra`. Altera o da tablatura instanciada de `appState.tomOriginal` para o tom em `notacaoTom`
+Método da instância de `Cifra`. Altera o tom da cifra instanciada de `appState.tomOriginal` para o tom selecionado em
+`notacaoTom`.

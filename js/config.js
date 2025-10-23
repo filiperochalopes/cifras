@@ -1,57 +1,21 @@
 let bancoDeCifras = [
   {
-    tom: "E",
-    nome: "a_volta_que_o_mundo_da",
-    afinacao: "E",
-  },
-  {
-    tom: "E",
-    nome: "a_sereia_e_o_nego_dagua",
-    afinacao: "E",
-  },
-  {
-    tom: "B",
-    nome: "o_castigo_vem_a_cavalo",
-    afinacao: "E",
-  },
-  {
-    tom: "A",
-    nome: "panela_velha",
-    afinacao: "D",
-  },
-  {
     tom: "D",
-    nome: "cubanita",
-    afinacao: "D",
-  },
-  {
-    tom: "Am",
-    nome: "boate_azul",
-    afinacao: "D",
-  },
-  {
-    tom: "E",
-    nome: "empreitada_perigosa",
+    nome: "harpa_crista_alvo_mais_que_a_neve",
     afinacao: "E",
   },
   {
-    tom: "E",
-    nome: "pagode_em_brasilia",
-    afinacao: "E",
-  },
-  {
-    tom: "E",
-    nome: "quando_a_lua_vem_surgindo",
+    tom: "C",
+    nome: "grupo_logos_autor_da_minha_fe",
     afinacao: "E",
   },
 ];
 
 let appState = {
-  tom: "E",
-  tomOriginal: "E",
+  tom: "D",
+  tomOriginal: "D",
   afinacao: "E",
   afinacaoOriginal: "E",
-  tablaturas: [],
   cifras: [],
   cifraOriginal: "", // Útil para reconhecimento de padrões na hora de fazer a substituição
   linhas: [],
@@ -81,25 +45,17 @@ const renderDependingOnWindowSize = () => {
   /**
    *
    * @param {string} mode "mobile" or "" Modo de exibição com ou sem quebra de linhas
-   * @param {int} tablaturaNum Número de notações por linha
    * @param {int} cifraChar Número de caracteres por linha na cifra
    */
-  const render = (modo, tablaturaNum, cifraChar) => {
-    $("#tablaturas").text("");
-
-    // Verifica quem vem primeiro ordenando instancias de Cifra e Tablatura pela linha
-    const instanciasTablaturaCifra = [
-      ...appState.tablaturas,
-      ...appState.cifras,
-    ].sort((a, b) => (a.linha > b.linha ? 1 : b.linha > a.linha ? -1 : 0));
+  const render = (modo = "desktop", cifraChar = 32) => {
+    // Ordena as cifras pela posição original no arquivo
+    const instanciasCifra = [...appState.cifras].sort((a, b) =>
+      a.linha > b.linha ? 1 : b.linha > a.linha ? -1 : 0
+    );
     let cifraRenderizada = "";
 
-    instanciasTablaturaCifra.forEach((instancia) => {
-      if (instancia instanceof Tablatura) {
-        cifraRenderizada += instancia.render(modo, tablaturaNum);
-      } else if (instancia instanceof Cifra) {
-        cifraRenderizada += instancia.render(modo, cifraChar);
-      }
+    instanciasCifra.forEach((instancia) => {
+      cifraRenderizada += instancia.render(modo, cifraChar);
     });
 
     $("#cifra").html(cifraRenderizada);
