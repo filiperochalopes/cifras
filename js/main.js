@@ -1,97 +1,142 @@
-$(document).ready(function () {
-  // Populando select de cifras
-  bancoDeCifras.forEach((cifra, i) => {
-    $("select#cifras").append(
-      `<option value="${cifra.nome}" ${i === 0 ? "selected" : ""}>${
-        cifra.nome
-      }</option>`
-    );
-  });
+document.addEventListener('DOMContentLoaded', () => {
+  const selectCifras = document.querySelector('select#cifras');
+  const cifraOriginalElement = document.getElementById('cifra_original');
+  const cifraElement = document.getElementById('cifra');
+  const tomInput = document.querySelector('input#tom');
+  const reduzirMeioTom = document.querySelector('button#reduzir_meio_tom');
+  const aumentarMeioTom = document.querySelector('button#aumentar_meio_tom');
+  const assinaturaToggle = document.getElementById('assinatura');
 
-  function trocarCifra(cifra) {
-    let cifraSelecionada = bancoDeCifras.filter(
-      (cifraDoBanco) => cifraDoBanco.nome === cifra
-    )[0];
+  if (selectCifras) {
+    bancoDeCifras.forEach((cifra, index) => {
+      const option = document.createElement('option');
+      option.value = cifra.nome;
+      option.textContent = cifra.nome;
+      if (index === 0) {
+        option.selected = true;
+      }
+      selectCifras.appendChild(option);
+    });
+  }
+
+  function trocarCifra(cifraNome) {
+    const cifraSelecionada = bancoDeCifras.find(
+      (cifraDoBanco) => cifraDoBanco.nome === cifraNome
+    );
+
+    if (!cifraSelecionada) {
+      return;
+    }
+
     appState.tom = cifraSelecionada.tom;
     appState.tomOriginal = cifraSelecionada.tom;
     appState.afinacao = cifraSelecionada.afinacao;
     appState.afinacaoOriginal = cifraSelecionada.afinacao;
 
-    $.ajax({
-      url: `examples/${cifra}.txt`,
-      dataType: "text",
-      success: function (data) {
+    fetch(`examples/${cifraNome}.txt`)
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error(`Não foi possível carregar a cifra ${cifraNome}`);
+        }
+        return response.text();
+      })
+      .then((data) => {
         appState.cifraOriginal = data;
         appState.linhas = checkCifraLines(data);
-        $("#cifra_original").text(appState.cifraOriginal);
-        $("#cifra").text(appState.cifraOriginal);
+        if (cifraOriginalElement) {
+          cifraOriginalElement.textContent = appState.cifraOriginal;
+        }
+        if (cifraElement) {
+          cifraElement.textContent = appState.cifraOriginal;
+        }
         appState.cifras = Cifra.extrairDaCifra(
           afinacoesPorApelido[appState.afinacaoOriginal],
           data
         );
         renderDependingOnWindowSize();
-      },
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+  }
+
+  window.addEventListener('resize', renderDependingOnWindowSize);
+
+  if (selectCifras) {
+    selectCifras.addEventListener('change', (event) => {
+      trocarCifra(event.target.value);
+    });
+    if (selectCifras.value) {
+      trocarCifra(selectCifras.value);
+    } else if (bancoDeCifras.length) {
+      trocarCifra(bancoDeCifras[0].nome);
+    }
+  }
+
+  if (tomInput) {
+    tomInput.value = appState.tom;
+  }
+
+  const alterarTomEExibir = () => {
+    appState.cifras.forEach((cifra) => cifra.alterarTom());
+    renderDependingOnWindowSize();
+  };
+
+  if (reduzirMeioTom) {
+    reduzirMeioTom.addEventListener('click', () => {
+      let novoTom = Object.entries(dicionarioTons).filter(
+        (nota) => nota[1] === dicionarioTons[appState.tom] - 1
+      );
+      if (!novoTom.length) {
+        novoTom = 'B';
+      } else {
+        novoTom = novoTom[0][0];
+      }
+      appState.tom = novoTom;
+      if (tomInput) {
+        tomInput.value = diegoHackChangeBemois(appState.tom);
+      }
+      alterarTomEExibir();
     });
   }
 
-  window.addEventListener("resize", renderDependingOnWindowSize);
+  if (aumentarMeioTom) {
+    aumentarMeioTom.addEventListener('click', () => {
+      let novoTom = Object.entries(dicionarioTons).filter(
+        (nota) => nota[1] === dicionarioTons[appState.tom] + 1
+      );
+      if (!novoTom.length) {
+        novoTom = 'C';
+      } else {
+        novoTom = novoTom[0][0];
+      }
+      appState.tom = novoTom;
+      if (tomInput) {
+        tomInput.value = diegoHackChangeBemois(appState.tom);
+      }
+      alterarTomEExibir();
+    });
+  }
 
-  // Ao trocar campo select de cifras, popula os dados de cifras
-  $("#cifras").change((e) => trocarCifra(e.target.value));
-  $("#cifras").change();
+  if (tomInput) {
+    tomInput.addEventListener('change', (event) => {
+      let novoTom = event.target.value;
+      if (Object.keys(dicionarioNotas).includes(novoTom)) {
+        novoTom = Object.entries(dicionarioTons).filter(
+          (tom) => tom[1] === dicionarioNotas[novoTom]
+        )[0][0];
+      } else {
+        novoTom = appState.tom;
+      }
+      appState.tom = novoTom;
+      tomInput.value = diegoHackChangeBemois(appState.tom);
+      alterarTomEExibir();
+    });
+  }
 
-  // Regulagem de tons, preenchendo tom principal
-  $("input#tom").val(appState.tom);
-  // Alterando tom pelo botão de "Reduzir Meio Tom"
-  $("button#reduzir_meio_tom").click(() => {
-    let novoTom = Object.entries(dicionarioTons).filter(
-      (nota) => nota[1] === dicionarioTons[appState.tom] - 1
-    );
-    if (!novoTom.length) {
-      novoTom = "B";
-    } else {
-      novoTom = novoTom[0][0];
-    }
-    appState.tom = novoTom;
-    $("input#tom").val(diegoHackChangeBemois(appState.tom));
-    // Alterando tom e renderizando no corpo do elemento #cifra
-    appState.cifras.forEach((cifra) => cifra.alterarTom());
-    renderDependingOnWindowSize();
-  });
-  // Alterando tom pelo botão de "Aumentar Meio Tom"
-  $("button#aumentar_meio_tom").click(() => {
-    let novoTom = Object.entries(dicionarioTons).filter(
-      (nota) => nota[1] === dicionarioTons[appState.tom] + 1
-    );
-    if (!novoTom.length) {
-      novoTom = "C";
-    } else {
-      novoTom = novoTom[0][0];
-    }
-    appState.tom = novoTom;
-    $("input#tom").val(diegoHackChangeBemois(appState.tom));
-    // Alterando tom e renderizando no corpo do elemento #cifra
-    appState.cifras.forEach((cifra) => cifra.alterarTom());
-    renderDependingOnWindowSize();
-  });
-  // Alterando tom direto pela digitação
-  $("input#tom").change((e) => {
-    let novoTom = e.target.value;
-    if (Object.keys(dicionarioNotas).includes(novoTom)) {
-      novoTom = Object.entries(dicionarioTons).filter(
-        (tom) => tom[1] === dicionarioNotas[novoTom]
-      )[0][0];
-    } else {
-      novoTom = appState.tom;
-    }
-    appState.tom = novoTom;
-    $("input#tom").val(diegoHackChangeBemois(appState.tom));
-    // Alterando tom e renderizando no corpo do elemento #cifra
-    appState.cifras.forEach((cifra) => cifra.alterarTom());
-    renderDependingOnWindowSize();
-  });
-
-  $("#assinatura").change(function () {
-    appState.premium = $(this).prop("checked")
-  });
+  if (assinaturaToggle) {
+    assinaturaToggle.addEventListener('change', (event) => {
+      appState.premium = event.target.checked;
+    });
+  }
 });

@@ -58,7 +58,10 @@ const renderDependingOnWindowSize = () => {
       cifraRenderizada += instancia.render(modo, cifraChar);
     });
 
-    $("#cifra").html(cifraRenderizada);
+    const cifraElement = document.getElementById('cifra');
+    if (cifraElement) {
+      cifraElement.innerHTML = cifraRenderizada;
+    }
     return cifraRenderizada;
   };
 

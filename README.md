@@ -34,7 +34,6 @@ tablatura.
 Primeiramente é necessário importar todos os arquivos de script em sua página:
 
 ```html
-<script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
 <script src="js/utils.js"></script>
 <script src="js/classes/Nota.js"></script>
 <script src="js/classes/Corda.js"></script>
